@@ -24,17 +24,13 @@ Author URI:		http://screennetz.de/
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
-/*
- http://codex.wordpress.org/Function_Reference/wpdb_Class
- */
 class ScreenLetsWipe {
 
 	/**
 	 * Plugin key
 	 * @var string
 	 */
-	const pluginKey = 'lets-wipe';
+	const pluginKey = 'plugin-screen-lets-wipe';
 
 	/**
 	 * plugin path
@@ -49,26 +45,21 @@ class ScreenLetsWipe {
 	public $db;
 
 	/**
-	 * Wordpress Table-Prefix
-	 * @var string
-	 */
-	private $tablePrefix;
-
-	/**
 	 * Constructor
 	 * @param object $wpdb
 	 */
-	public function  __construct($wpdb, $tablePrefix) {
+	public function  __construct() {
+		global $wpdb;
 		$this->db = $wpdb;
-		$this->tablePrefix = $tablePrefix;
+		$this->pluginPath = WP_PLUGIN_DIR.'/lets-wipe';
 	}
 	
 	/**
 	 * init the plugin
 	 * @return void
 	 */
-	public function init($wpdb) {
-		$this->pluginPath = WP_PLUGIN_DIR.'/lets-wipe';
+	public function init() {
+		
 
 //		print('<pre>');
 //		print_r( @get_defined_constants() );
@@ -87,13 +78,17 @@ class ScreenLetsWipe {
 	 * @return void
 	 */
 	public function activation() {
-		$schemaFile = $this->pluginPath.'/sql/schema.sql';
-		if (!is_readable($schemaFile)) return false;
-		$schemaTmp = file($schemaFile);
-		$schemaContent = null;
-		foreach ($schemaTmp as $val) $schemaContent .= $val;
-		$schemaQueries = explode(';', $schemaContent);
-		foreach ($schemaQueries as $query) $this->db->query(str_replace('{TABLE_PREFIX}', $this->tablePrefix, $query));
+
+		if (!class_exists('ScreenLetsWipeDbm')) {
+			require_once $this->pluginPath.'/lib/dbm.php';
+		}
+		$screenLetsWipeDbm = new ScreenLetsWipeDbm();
+		$screenLetsWipeDbm->install();
+
+		add_option(self::pluginKey.'-dbm', '1.0', null, 'no');
+		$currentDbVersion = get_option(self::pluginKey);
+		if ($currentDbVersion != $screenLetsWipeDbm->getDbm()) $screenLetsWipeDbm->update($currentDbVersion);
+		unset($screenLetsWipeDbm);
 	}
 	
 	/**
@@ -101,18 +96,27 @@ class ScreenLetsWipe {
 	 * @return viod
 	 */
 	public function deactivation() {
-				
+		
 	}
 
 	/**
 	 * uninstall this plugin
 	 */
 	public function uninstall() {
-		
+		if (!class_exists('ScreenLetsWipeDbm')) {
+			require_once $this->pluginPath.'/lib/dbm.php';
+		}
+		$screenLetsWipeDbm = new ScreenLetsWipeDbm();
+		$screenLetsWipeDbm->uninstall();
+		unset($screenLetsWipeDbm);
+		delete_option(self::pluginKey.'-dbm');
 	}
 
-	public function options() {
-		
+	/**
+	 * Index
+	 */
+	public function index() {
+	
 	}
 	
 	/**
@@ -120,11 +124,10 @@ class ScreenLetsWipe {
 	 * @return void
 	 */
 	public function menu() {
-		add_options_page('Lets Wipe', 'Lets Wipe', 'manage_options', self::pluginKey, array($this, 'options'));
+		add_options_page('Lets Wipe', 'Lets Wipe', 'manage_options', self::pluginKey, array($this, 'index'));
 	}
 }
-
-$screenLetsWipe = new ScreenLetsWipe($wpdb, $table_prefix);
+$screenLetsWipe = new ScreenLetsWipe();
 register_activation_hook(__FILE__, array($screenLetsWipe, 'activation'));
 register_deactivation_hook(__FILE__, array($screenLetsWipe, 'deactivation'));
 register_uninstall_hook(__FILE__, array($screenLetsWipe, 'uninstall'));
