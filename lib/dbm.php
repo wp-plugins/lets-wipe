@@ -2,6 +2,7 @@
 /*
  * Database-Manager
  * @see http://codex.wordpress.org/Function_Reference/wpdb_Class
+ * @see http://codex.wordpress.org/Creating_Tables_with_Plugins
  */
 class ScreenLetsWipeDbm {
 

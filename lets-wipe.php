@@ -116,6 +116,33 @@ class ScreenLetsWipe {
 	 * Index
 	 */
 	public function index() {
+
+		if (!current_user_can('manage_options')) wp_die(__('You do not have sufficient permissions to access this page.'));
+		echo('<div class="wrap">');
+		echo('<div id="icon-options-general" class="icon32"><br /></div>');
+		echo('<h2>Lets Wipe</h2>');
+		echo('<div style="width: 40%; float: left">');
+
+		echo('</div><div style="width: 59%; float: right; padding-left: 10px">');
+		echo('<form method="post" action="options-general.php?page='.$this->pluginKey.'">
+			<table class="widefat" style="margin-top: 1em; width: 250px">
+				<thead><tr><th scope="col">Datei-Typ anlegen</th></tr></thead>
+ 				<tbody><tr><td style="text-align: center"><input type="text" name="newExtension" style="width: 90%" /><br /><input name="newExtensionSubmit" type="submit" class="button-primary" value="Anlegen" /></td></tr></tbody>
+ 			</table>
+ 			</form>
+ 			<form method="post" action="options-general.php?page='.$this->pluginKey.'">
+			<table class="widefat" style="margin-top: 1em; width: 250px">
+				<thead><tr><th scope="col">Datei-Typ entfernen</th></tr></thead>
+ 				<tbody><tr><td style="text-align: center"><select name="deleteExtension" style="width: 90%" /><option value=""></option>');
+		
+		echo('	</select><br /><input name="deleteExtensionSubmit" type="submit" class="button-primary" value="L&ouml;schen" /></td></tr></tbody>
+ 			</table>
+ 			</form>
+ 			<table class="widefat" style="margin-top: 1em; width: 250px">
+				<thead><tr><th scope="col">Lets Wipe</th></tr></thead>
+ 				<tbody><tr><td><ul><li><a href="http://screennetz.de/develop/lets-wipe/">Plugin Website</a></li><li><a href="http://screennetz.de/">Author Website</a></li></ul></td></tr></tbody>
+ 			</table>');
+		echo('</div></div>');
 	
 	}
 	
@@ -124,7 +151,10 @@ class ScreenLetsWipe {
 	 * @return void
 	 */
 	public function menu() {
-		add_options_page('Lets Wipe', 'Lets Wipe', 'manage_options', self::pluginKey, array($this, 'index'));
+		//add_options_page('Lets Wipe', 'Lets Wipe', 'manage_options', self::pluginKey, array($this, 'index'));
+		//add_submenu_page('users.php', 'Meine Charaktere', 'Meine Charaktere', 'manage_options', self::pluginKey, array($this, 'index'));
+		add_menu_page('Lets Wipe', 'Lets Wipe', 'manage_options', self::pluginKey, array($this, 'index'));
+		add_submenu_page(self::pluginKey, 'Charaktere', 'Charaktere', 'manage_options', self::pluginKey, array($this, 'index'));
 	}
 }
 $screenLetsWipe = new ScreenLetsWipe();
